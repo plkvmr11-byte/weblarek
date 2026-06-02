@@ -45,7 +45,7 @@ export interface IProductsResponse {
 
 // Данные заказа для отправки на сервер
 export interface IOrder {
-  payment: 'online' | 'cash';
+  payment: 'card' | 'cash';
   email: string;
   phone: string;
   address: string;

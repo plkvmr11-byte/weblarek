@@ -55,22 +55,25 @@ export class BuyerModel extends EventEmitter {
   }
 
   // Проверить валидность данных
-  validate(): Partial<Record<keyof IBuyer, string>> {
-    const errors: Partial<Record<keyof IBuyer, string>> = {};
+validate(): Partial<Record<keyof IBuyer, string>> {
+  const errors: Partial<Record<keyof IBuyer, string>> = {};
 
-    if (!this._payment) {
-      errors.payment = 'Не выбран способ оплаты';
-    }
-    if (!this._address.trim()) {
-      errors.address = 'Укажите адрес доставки';
-    }
-    if (!this._email.trim()) {
-      errors.email = 'Укажите email';
-    }
-    if (!this._phone.trim()) {
-      errors.phone = 'Укажите телефон';
-    }
-
-    return errors;
+  if (!this._payment) {
+    errors.payment = 'Не выбран способ оплаты';
   }
+
+  if (!this._address.trim()) {
+    errors.address = 'Укажите адрес доставки';
+  }
+
+  if (!this._email.trim()) {
+    errors.email = 'Укажите email';
+  }
+
+  if (!this._phone.trim()) {
+    errors.phone = 'Укажите телефон';
+  }
+
+  return errors;
+}
 }
