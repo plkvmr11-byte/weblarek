@@ -2,14 +2,23 @@ export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export interface IApi {
   get<T extends object>(uri: string): Promise<T>;
-  post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+  post<T extends object>(
+    uri: string,
+    data: object,
+    method?: ApiPostMethods
+  ): Promise<T>;
 }
 
 // Тип для способа оплаты
 export type TPayment = 'card' | 'cash';
 
 // Тип для категорий товара
-export type TCategory = 'софт-скил' | 'хард-скил' | 'кнопка' | 'дополнительное' | 'другое';
+export type TCategory =
+  | 'софт-скил'
+  | 'хард-скил'
+  | 'кнопка'
+  | 'дополнительное'
+  | 'другое';
 
 // Интерфейс товара
 export interface IProduct {
@@ -23,19 +32,17 @@ export interface IProduct {
 
 // Интерфейс покупателя
 export interface IBuyer {
-  payment: TPayment;
+  payment: TPayment | null;
   address: string;
   email: string;
   phone: string;
 }
 
-// ===== ДЛЯ РАБОТЫ С API =====
+// Ошибки валидации покупателя
+export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
-// Товар в корзине
-export interface ICartItem {
-  product: IProduct;
-  quantity: number;
-}
+
+// ===== ДЛЯ РАБОТЫ С API =====
 
 // Ответ сервера на GET /product/
 export interface IProductsResponse {
@@ -44,11 +51,8 @@ export interface IProductsResponse {
 }
 
 // Данные заказа для отправки на сервер
-export interface IOrder {
-  payment: 'card' | 'cash';
-  email: string;
-  phone: string;
-  address: string;
+export interface IOrder extends Omit<IBuyer, 'payment'> {
+  payment: TPayment;
   total: number;
   items: string[];
 }

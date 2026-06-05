@@ -1,79 +1,73 @@
-import { EventEmitter } from '../base/Events';
-import { IBuyer } from '../../types';
+import { IBuyer, TPayment, TBuyerErrors } from '../../types';
 
-export class BuyerModel extends EventEmitter {
-  protected _payment: 'card' | 'cash' | null = null;
-  protected _address: string = '';
-  protected _email: string = '';
-  protected _phone: string = '';
-
-  constructor() {
-    super();
-  }
+export class BuyerModel {
+  protected payment: TPayment | null = null;
+  protected address = '';
+  protected email = '';
+  protected phone = '';
 
   // Сохранить способ оплаты
-  setPayment(method: 'card' | 'cash'): void {
-    this._payment = method;
-    this.emit('buyer:changed');
+  setPayment(method: TPayment): void {
+    this.payment = method;
   }
 
   // Сохранить адрес
   setAddress(address: string): void {
-    this._address = address;
-    this.emit('buyer:changed');
+    this.address = address;
   }
 
   // Сохранить email
   setEmail(email: string): void {
-    this._email = email;
-    this.emit('buyer:changed');
+    this.email = email;
   }
 
   // Сохранить телефон
   setPhone(phone: string): void {
-    this._phone = phone;
-    this.emit('buyer:changed');
+    this.phone = phone;
   }
 
-  // Получить все данные покупателя
+  // Получить данные покупателя
   getBuyer(): IBuyer {
+    if (!this.payment) {
+      throw new Error('Способ оплаты не выбран');
+    }
+
     return {
-      payment: this._payment!,
-      address: this._address,
-      email: this._email,
-      phone: this._phone,
+      payment: this.payment,
+      address: this.address,
+      email: this.email,
+      phone: this.phone,
     };
   }
 
-  // Очистить все данные
+  // Очистить данные
   clear(): void {
-    this._payment = null;
-    this._address = '';
-    this._email = '';
-    this._phone = '';
-    this.emit('buyer:changed');
+    this.payment = null;
+    this.address = '';
+    this.email = '';
+    this.phone = '';
   }
 
   // Проверить валидность данных
-validate(): Partial<Record<keyof IBuyer, string>> {
-  const errors: Partial<Record<keyof IBuyer, string>> = {};
+  validate(): TBuyerErrors {
+    const errors: TBuyerErrors = {};
 
-  if (!this._payment) {
-    errors.payment = 'Не выбран способ оплаты';
+    if (!this.payment) {
+      errors.payment = 'Не выбран способ оплаты';
+    }
+
+    if (!this.address.trim()) {
+      errors.address = 'Укажите адрес доставки';
+    }
+
+    if (!this.email.trim()) {
+      errors.email = 'Укажите email';
+    }
+
+    if (!this.phone.trim()) {
+      errors.phone = 'Укажите телефон';
+    }
+
+    return errors;
   }
-
-  if (!this._address.trim()) {
-    errors.address = 'Укажите адрес доставки';
-  }
-
-  if (!this._email.trim()) {
-    errors.email = 'Укажите email';
-  }
-
-  if (!this._phone.trim()) {
-    errors.phone = 'Укажите телефон';
-  }
-
-  return errors;
-}
 }

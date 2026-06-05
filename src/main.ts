@@ -1,9 +1,12 @@
 import './scss/styles.scss';
+
 import { ProductsModel } from './components/models/ProductsModel';
 import { CartModel } from './components/models/CartModel';
 import { BuyerModel } from './components/models/BuyerModel';
+
 import { apiProducts } from './utils/data';
 import { IProduct } from './types';
+
 import { Api } from './components/base/Api';
 import { API_URL } from './utils/constants';
 import { WebLarekApi } from './components/WebLarekApi';
@@ -17,21 +20,24 @@ const buyerModel = new BuyerModel();
 const products = apiProducts.items as IProduct[];
 
 // ===== ПРОВЕРКА PRODUCTSMODEL =====
+
 console.log('=== Проверка ProductsModel ===');
 
 productsModel.setProducts(products);
+
 console.log('Массив товаров:', productsModel.getProducts());
 
 const firstProductId = products[0]?.id;
 
 if (firstProductId) {
-productsModel.setPreview(firstProductId);
+  productsModel.setPreview(firstProductId);
 
-console.log('Выбранный товар:', productsModel.getPreview());
-console.log('Товар по ID:', productsModel.getProduct(firstProductId));
+  console.log('Выбранный товар:', productsModel.getPreview());
+  console.log('Товар по ID:', productsModel.getProduct(firstProductId));
 }
 
 // ===== ПРОВЕРКА CARTMODEL =====
+
 console.log('=== Проверка CartModel ===');
 
 const testProduct = products[0];
@@ -50,9 +56,11 @@ console.log('После удаления:', cartModel.getItems());
 console.log('Товар есть после удаления:', cartModel.has(testProduct.id));
 
 cartModel.clear();
+
 console.log('После очистки:', cartModel.getItems());
 
 // ===== ПРОВЕРКА BUYERMODEL =====
+
 console.log('=== Проверка BuyerModel ===');
 
 buyerModel.setPayment('card');
@@ -61,10 +69,15 @@ buyerModel.setEmail('test@test.com');
 buyerModel.setPhone('+79991234567');
 
 console.log('Данные покупателя:', buyerModel.getBuyer());
-console.log('Результат валидации:', buyerModel.validate());
+console.log('Валидация корректных данных:', buyerModel.validate());
 
+// Проверка невалидных данных
 buyerModel.clear();
-console.log('После очистки:', buyerModel.getBuyer());
+
+console.log(
+  'Валидация после очистки:',
+  buyerModel.validate()
+);
 
 console.log('=== ВСЕ ПРОВЕРКИ ЗАВЕРШЕНЫ ===');
 
