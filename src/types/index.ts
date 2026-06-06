@@ -12,13 +12,6 @@ export interface IApi {
 // Тип для способа оплаты
 export type TPayment = 'card' | 'cash';
 
-// Тип для категорий товара
-export type TCategory =
-  | 'софт-скил'
-  | 'хард-скил'
-  | 'кнопка'
-  | 'дополнительное'
-  | 'другое';
 
 // Интерфейс товара
 export interface IProduct {
@@ -26,7 +19,7 @@ export interface IProduct {
   description: string;
   image: string;
   title: string;
-  category: TCategory;
+  category: string;
   price: number | null;
 }
 

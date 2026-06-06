@@ -27,18 +27,14 @@ export class BuyerModel {
   }
 
   // Получить данные покупателя
-  getBuyer(): IBuyer {
-    if (!this.payment) {
-      throw new Error('Способ оплаты не выбран');
-    }
-
-    return {
-      payment: this.payment,
-      address: this.address,
-      email: this.email,
-      phone: this.phone,
-    };
-  }
+getBuyer(): IBuyer {
+  return {
+    payment: this.payment,
+    address: this.address,
+    email: this.email,
+    phone: this.phone,
+  };
+}
 
   // Очистить данные
   clear(): void {

@@ -1,13 +1,8 @@
-import { EventEmitter } from '../base/Events';
 import { IProduct } from '../../types';
 
-export class ProductsModel extends EventEmitter {
+export class ProductsModel {
   protected _products: IProduct[] = [];
   protected _previewId: string | null = null;
-
-  constructor() {
-    super();
-  }
 
   // Получить список всех товаров
   getProducts(): IProduct[] {
@@ -17,7 +12,6 @@ export class ProductsModel extends EventEmitter {
   // Сохранить массив товаров
   setProducts(products: IProduct[]): void {
     this._products = products;
-    this.emit('products:changed', this._products);
   }
 
   // Получить товар по ID
@@ -28,13 +22,14 @@ export class ProductsModel extends EventEmitter {
   // Сохранить выбранную карточку
   setPreview(id: string | null): void {
     this._previewId = id;
-    const previewProduct = this.getPreview();
-    this.emit('preview:changed', previewProduct);
   }
 
   // Получить выбранную карточку
   getPreview(): IProduct | undefined {
-    if (!this._previewId) return undefined;
+    if (!this._previewId) {
+      return undefined;
+    }
+
     return this.getProduct(this._previewId);
   }
 }
