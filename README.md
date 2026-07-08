@@ -240,3 +240,315 @@ constructor() — принимает брокер событий для опов
    - **Параметры:** `order: IOrder` — данные заказа
    - **Возвращает:** промис с объектом `IOrderResult`, содержащим результат оформления заказа
    - **Действие:** выполняет POST-запрос к эндпоинту `/order/` и отправляет данные заказа на сервер
+
+#### Документация классов слоя Представления (View)
+
+### Базовые классы
+
+## Component
+
+Назначение: базовый класс для всех компонентов представления. Содержит общую логику работы с DOM-элементами и методы для отображения данных.
+
+Конструктор:
+
+`constructor(container: HTMLElement)`
+
+Поля:
+
+container: HTMLElement — корневой DOM-элемент компонента.
+
+Методы:
+
+render(data?: Partial<T>): HTMLElement — отображает переданные данные и возвращает корневой элемент.
+setText(element: HTMLElement, value: string | number): void — устанавливает текст элемента.
+setImage(element: HTMLImageElement, src: string, alt?: string): void — устанавливает изображение.
+toggleClass(element: HTMLElement, className: string, force?: boolean): void — добавляет или удаляет CSS-класс.
+setVisible(element: HTMLElement): void — делает элемент видимым.
+setHidden(element: HTMLElement): void — скрывает элемент.
+setDisabled(element: HTMLElement, state: boolean): void — изменяет состояние элемента.
+
+## Card
+
+Назначение: базовый класс для всех карточек товара. Содержит общий функционал отображения информации о товаре. От него наследуются CardCatalog, CardPreview и CardBasket.
+
+Конструктор:
+
+`constructor(container: HTMLElement)`
+
+Поля:
+
+_title: HTMLElement — название товара.
+_price: HTMLElement — цена товара.
+
+Методы:
+
+set title(value: string): void — отображает название товара.
+set price(value: number | null): void — отображает цену товара или текст «Бесценно».
+
+# CardCatalog
+
+Назначение: класс карточки товара для каталога. Отображает товар в списке и позволяет открыть подробный просмотр или добавить товар в корзину.
+
+Конструктор:
+
+`constructor(container: HTMLElement, actions: ICardActions)`
+
+Поля:
+
+_image: HTMLImageElement — изображение товара.
+_category: HTMLElement — категория товара.
+
+Методы:
+
+set image(value: string): void — отображает изображение товара, устанавливает src и alt.
+set category(value: string): void — отображает категорию товара и задаёт CSS-класс в зависимости от типа категории.
+
+Клик по карточке — вызывает actions.onClick
+
+# CardPreview
+
+Назначение: класс карточки предпросмотра товара. Показывает подробную информацию о товаре и позволяет добавить его в корзину.
+
+Конструктор:
+
+`constructor(container: HTMLElement, actions: ICardActions)`
+
+Поля:
+
+_imageElement: HTMLImageElement — изображение товара.
+_categoryElement: HTMLElement — категория товара.
+_descriptionElement: HTMLElement — описание товара.
+_buttonElement: HTMLButtonElement — кнопка действия (например, “В корзину”).
+
+Методы:
+
+set image(value: string): void — отображает изображение товара.
+set category(value: string): void — отображает категорию товара с соответствующим CSS-классом.
+set description(value: string): void — отображает описание товара.
+set buttonText(value: string): void — изменяет текст кнопки.
+set disabled(state: boolean): void — блокирует или разблокирует кнопку.
+
+Клик по кнопке — вызывает actions.onAdd
+
+# CardBasket
+
+Назначение: класс карточки товара в корзине. Отображает товар в списке корзины и позволяет удалить его.
+
+Конструктор:
+
+`constructor(container: HTMLElement, actions: ICardActions)`
+
+Поля:
+
+_indexElement: HTMLElement — порядковый номер товара в корзине.
+_buttonElement: HTMLButtonElement — кнопка удаления товара.
+
+Методы:
+
+set index(value: number): void — отображает порядковый номер товара в корзине.
+
+Клик по кнопке удаления — вызывает actions.onRemove
+
+## Form
+
+Назначение: базовый класс для всех форм. Содержит общую логику обработки ввода данных, отображения ошибок и управления кнопкой отправки.
+
+Конструктор:
+
+`constructor(container: HTMLFormElement)`
+
+Поля:
+
+_submitButton: HTMLButtonElement — кнопка отправки формы.
+_errors: HTMLElement — элемент отображения ошибок.
+
+Методы:
+
+set valid(value: boolean): void — включает или отключает кнопку отправки.
+set errors(value: string): void — отображает сообщение об ошибке.
+
+### Компоненты представления
+
+## Header
+
+Назначение: отображает шапку сайта. Управляет кнопкой открытия корзины и отображает количество товаров в корзине.
+
+Конструктор:
+
+`constructor(container: HTMLElement, actions?: IHeaderActions)`
+
+Поля:
+
+_basketButton: HTMLButtonElement — кнопка корзины.
+_counter: HTMLElement — счётчик товаров.
+
+Методы:
+
+set counter(value: number): void — отображает количество товаров в корзине.
+
+## Gallery
+
+Назначение: отображает каталог товаров на главной странице.
+
+Конструктор:
+
+`constructor(container: HTMLElement, actions?: IHeaderActions)`
+
+Поля:
+
+_
+catalog: HTMLElement — контейнер каталога.
+
+Методы:
+
+set items(value: HTMLElement[]): void — отображает карточки товаров.
+clear(): void — очищает каталог.
+
+## Modal
+
+Назначение: универсальное модальное окно. Отображает любой компонент внутри себя.
+
+Конструктор:
+
+`container: HTMLElement, protected events: IEvents`
+
+Поля:
+
+_content: HTMLElement — контейнер содержимого.
+_closeButton: HTMLButtonElement — кнопка закрытия.
+
+Методы:
+
+open(): void — открывает модальное окно.
+close(): void — закрывает модальное окно.
+set content(value: HTMLElement): void — устанавливает содержимое модального окна.
+
+
+## BasketView
+
+Назначение: отображает содержимое корзины.
+
+Конструктор:
+
+`constructor(container: HTMLElement)`
+
+Поля:
+
+_list: HTMLElement — список товаров.
+_total: HTMLElement — итоговая стоимость.
+_button: HTMLButtonElement — кнопка оформления заказа.
+
+Методы:
+
+set items(value: HTMLElement[]): void — отображает товары.
+set total(value: number): void — отображает общую стоимость.
+
+## OrderForm
+
+Назначение: отображает форму выбора способа оплаты и ввода адреса доставки.
+
+Конструктор:
+
+`constructor(container: HTMLFormElement, events: IEvents)`
+
+Поля:
+
+cardButton: HTMLButtonElement — кнопка оплаты картой.
+cashButton: HTMLButtonElement — кнопка оплаты наличными.
+addressInput: HTMLInputElement — поле ввода адреса.
+
+Методы:
+
+set payment(value: 'card' | 'cash'): void — отображает выбранный способ оплаты.
+set address(value: string): void — отображает адрес доставки.
+
+## ContactsForm
+
+Назначение: отображает форму ввода контактных данных покупателя.
+
+Конструктор:
+
+`constructor(container: HTMLFormElement, events: IEvents)`
+
+Поля:
+
+_email: HTMLInputElement — поле ввода электронной почты.
+_phone: HTMLInputElement — поле ввода телефона.
+
+Методы:
+
+set email(value: string): void — отображает адрес электронной почты.
+set phone(value: string): void — отображает номер телефона.
+
+## Success 
+
+Назначение: отображает сообщение об успешном оформлении заказа.
+
+Конструктор:
+
+`constructor(container: HTMLElement)`
+
+Поля:
+
+_description: HTMLElement — текст с суммой списания.
+_button: HTMLButtonElement — кнопка закрытия окна.
+
+Методы:
+
+set total(value: number): void — отображает сумму списанных синапсов.
+
+#### Презентер
+
+Назначение: презентер отвечает за всю бизнес-логику приложения и связывает слой моделей данных и слой представления (View).
+Он не хранит состояние приложения и не генерирует события, а только обрабатывает события, поступающие от моделей и представлений.
+
+## События модели данных
+
+ProductsModel: products:changed — обновление каталога товаров, product:preview — выбор товара для просмотра
+CartModel: cart:changed — изменение содержимого корзины
+BuyerModel: buyer:changed — изменение данных покупателя
+
+## События представления
+
+Каталог / карточки:
+card:select — открыть превью товара
+card:add — добавить/убрать товар из корзины
+
+Корзина:
+basket:open — открыть корзину
+basket:remove — удалить товар
+basket:checkout — перейти к оформлению
+
+Форма заказа:
+order:submit — переход к форме контактов
+contacts:submit — отправка заказа
+
+Формы ввода:
+order:payment:change — изменение способа оплаты
+order:address:change — изменение адреса
+buyer:email:change — изменение email
+buyer:phone:change — изменение телефона
+
+## Поток данных
+
+1. Загрузка каталога:
+API получает список товаров
+Данные сохраняются в ProductsModel
+Модель генерирует событие products:changed
+Презентер: получает данные из модели, создает карточки через View, отображает их в Gallery
+
+2. Выбор товара:
+Пользователь нажимает на карточку
+View генерирует card:select
+Презентер: получает товар из модели, передает данные в Modal, отображает превью карточки
+
+3. Работа корзины
+Добавление/удаление товара → CartModel
+Модель генерирует cart:changed
+Презентер: обновляет счётчик в Header, обновляет содержимое BasketView
+
+4. Оформление заказа
+Пользователь заполняет форму
+View генерирует события изменения полей
+Презентер обновляет BuyerModel
+При сабмите: данные берутся из модели, отправляются на сервер, при успехе открывается Success

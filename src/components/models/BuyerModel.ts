@@ -1,69 +1,167 @@
 import { IBuyer, TPayment, TBuyerErrors } from '../../types';
+import { EventEmitter } from '../base/Events';
+
 
 export class BuyerModel {
+
   protected payment: TPayment | null = null;
   protected address = '';
   protected email = '';
   protected phone = '';
 
-  // Сохранить способ оплаты
+  protected events: EventEmitter;
+
+
+  constructor(events: EventEmitter) {
+    this.events = events;
+  }
+
+
+  // ================== SETTERS ==================
+
   setPayment(method: TPayment): void {
+
     this.payment = method;
+
+    this.events.emit('buyer:changed');
+
   }
 
-  // Сохранить адрес
+
   setAddress(address: string): void {
+
     this.address = address;
+
+    this.events.emit('buyer:changed');
+
   }
 
-  // Сохранить email
+
   setEmail(email: string): void {
+
     this.email = email;
+
+    this.events.emit('buyer:changed');
+
   }
 
-  // Сохранить телефон
+
   setPhone(phone: string): void {
+
     this.phone = phone;
+
+    this.events.emit('buyer:changed');
+
   }
 
-  // Получить данные покупателя
-getBuyer(): IBuyer {
-  return {
-    payment: this.payment,
-    address: this.address,
-    email: this.email,
-    phone: this.phone,
-  };
-}
 
-  // Очистить данные
+
+  // ================== GET DATA ==================
+
+  getBuyer(): IBuyer {
+
+    return {
+
+      payment: this.payment,
+
+      address: this.address,
+
+      email: this.email,
+
+      phone: this.phone,
+
+    };
+
+  }
+
+
+
+  // ================== CLEAR ==================
+
   clear(): void {
+
     this.payment = null;
+
     this.address = '';
+
     this.email = '';
+
     this.phone = '';
+
+    this.events.emit('buyer:changed');
+
   }
 
-  // Проверить валидность данных
-  validate(): TBuyerErrors {
+
+
+  // ================== VALIDATION ORDER ==================
+  // Проверяем первый экран заказа
+
+  validateOrder(): TBuyerErrors {
+
     const errors: TBuyerErrors = {};
 
+
     if (!this.payment) {
+
       errors.payment = 'Не выбран способ оплаты';
+
     }
+
 
     if (!this.address.trim()) {
+
       errors.address = 'Укажите адрес доставки';
+
     }
 
-    if (!this.email.trim()) {
-      errors.email = 'Укажите email';
-    }
-
-    if (!this.phone.trim()) {
-      errors.phone = 'Укажите телефон';
-    }
 
     return errors;
+
   }
+
+
+
+  // ================== VALIDATION CONTACTS ==================
+  // Проверяем второй экран заказа
+
+  validateContacts(): TBuyerErrors {
+
+    const errors: TBuyerErrors = {};
+
+
+    if (!this.email.trim()) {
+
+      errors.email = 'Укажите email';
+
+    }
+
+
+    if (!this.phone.trim()) {
+
+      errors.phone = 'Укажите телефон';
+
+    }
+
+
+    return errors;
+
+  }
+
+
+
+  // ================== FULL VALIDATION ==================
+
+  validate(): TBuyerErrors {
+
+    return {
+
+      ...this.validateOrder(),
+
+      ...this.validateContacts(),
+
+    };
+
+  }
+
 }

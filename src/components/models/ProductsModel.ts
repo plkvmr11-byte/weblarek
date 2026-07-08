@@ -1,8 +1,14 @@
 import { IProduct } from '../../types';
+import { EventEmitter } from '../base/Events'; 
 
 export class ProductsModel {
   protected _products: IProduct[] = [];
-  protected _previewId: string | null = null;
+  protected _preview: IProduct | null = null;
+  protected events: EventEmitter; 
+  
+  constructor(events: EventEmitter) { 
+    this.events = events; 
+  } 
 
   // Получить список всех товаров
   getProducts(): IProduct[] {
@@ -12,6 +18,7 @@ export class ProductsModel {
   // Сохранить массив товаров
   setProducts(products: IProduct[]): void {
     this._products = products;
+    this.events.emit('catalog:changed');
   }
 
   // Получить товар по ID
@@ -20,16 +27,13 @@ export class ProductsModel {
   }
 
   // Сохранить выбранную карточку
-  setPreview(id: string | null): void {
-    this._previewId = id;
+  setPreview(product: IProduct | null): void {
+    this._preview = product;
+    this.events.emit('product:preview');
   }
 
   // Получить выбранную карточку
   getPreview(): IProduct | undefined {
-    if (!this._previewId) {
-      return undefined;
-    }
-
-    return this.getProduct(this._previewId);
+    return this._preview ?? undefined;
   }
 }
