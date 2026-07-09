@@ -87,6 +87,7 @@ const success = new Success(
 
 webApi.getProducts()
   .then((data: { items: IProduct[] }) => {
+    console.log(data.items);
     productsModel.setProducts(data.items);
   })
   .catch(console.error);
@@ -123,7 +124,6 @@ events.on<{ id: string }>('card:select', ({ id }) => {
   }
 });
 
-
 events.on('product:preview', () => {
   const product = productsModel.getPreview();
 
@@ -132,18 +132,29 @@ events.on('product:preview', () => {
   const card = new CardPreview(
     cloneTemplate(cardPreviewTpl),
     {
-      onAdd: () => cartModel.add(product)
+      onAdd: () => {
+        if (cartModel.has(product.id)) {
+          cartModel.remove(product.id);
+        } else {
+          cartModel.add(product);
+        }
+
+        modal.close();
+      }
     }
   );
 
   modal.content = card.render({
     ...product,
     image: `${CDN_URL}${product.image}`,
-    buttonText: cartModel.has(product.id)
-        ? 'Уже в корзине'
-        : 'В корзину',
-    disabled: cartModel.has(product.id)
-});
+    buttonText:
+      product.price === null
+        ? 'Недоступно'
+        : cartModel.has(product.id)
+          ? 'Удалить из корзины'
+          : 'Купить',
+    disabled: product.price === null
+  });
 
   modal.open();
 });
@@ -177,7 +188,8 @@ events.on('basket:open', () => {
 
   modal.content = basket.render({
     items: cards,
-    total: cartModel.getTotal()
+    total: cartModel.getTotal(),
+    disabled: cartModel.getCount() === 0
   });
 
   modal.open();
@@ -186,10 +198,15 @@ events.on('basket:open', () => {
 // ================== ORDER ==================
 
 events.on('basket:checkout', () => {
+  const buyer = buyerModel.getBuyer();
+
   modal.content = orderForm.render({
-    address: '',
-    payment: 'card'
+    address: buyer.address,
+    payment: buyer.payment
   });
+
+  orderForm.valid = false;
+  orderForm.errors = '';
 
   modal.open();
 });
@@ -197,69 +214,95 @@ events.on('basket:checkout', () => {
 // ================== ORDER VALIDATION ==================
 
 function checkOrderForm(): void {
-  const errors = buyerModel.validate();
-
-  const orderErrors = {
-    payment: errors.payment,
-    address: errors.address
-  };
+  const errors = buyerModel.validateOrder();
 
   orderForm.valid =
-    !orderErrors.payment &&
-    !orderErrors.address;
+    !errors.payment &&
+    !errors.address;
 
-  orderForm.errors = Object.values(orderErrors)
+  orderForm.errors = Object.values(errors)
     .filter(Boolean)
     .join(', ');
 }
 
+
 // ================== ORDER DATA ==================
 
-events.on('order:payment', (data: { payment: TPayment }) => {
-  buyerModel.setPayment(data.payment);
-  orderForm.payment = data.payment;
+events.on('order:payment', ({ payment }: { payment: TPayment }) => {
+  buyerModel.setPayment(payment);
+
+  orderForm.payment = payment;
 
   checkOrderForm();
 });
 
 
-events.on('order:address', (data: { address: string }) => {
-  buyerModel.setAddress(data.address);
+events.on('order:address', ({ address }: { address: string }) => {
+  buyerModel.setAddress(address);
 
   checkOrderForm();
 });
 
-// ================== CONTACT FORM ==================
+
+// ================== NEXT STEP ==================
 
 events.on('order:submit', () => {
+  const errors = buyerModel.validateOrder();
+
+  if (Object.keys(errors).length > 0) {
+    checkOrderForm();
+    return;
+  }
+
   modal.content = contactsForm.render({
-    email: '',
-    phone: ''
+    email: buyerModel.getBuyer().email,
+    phone: buyerModel.getBuyer().phone
   });
+
+  checkContactsForm();
 
   modal.open();
 });
 
 
-events.on('contacts:email', (data: { email: string }) => {
-  buyerModel.setEmail(data.email);
+// ================== CONTACT VALIDATION ==================
+
+function checkContactsForm(): void {
+  const errors = buyerModel.validateContacts();
+
+  contactsForm.valid =
+    !errors.email &&
+    !errors.phone;
+
+  contactsForm.errors = Object.values(errors)
+    .filter(Boolean)
+    .join(', ');
+}
+
+
+// ================== CONTACT FORM ==================
+
+events.on('contacts:email', ({ email }: { email: string }) => {
+  buyerModel.setEmail(email);
+
+  checkContactsForm();
 });
 
 
-events.on('contacts:phone', (data: { phone: string }) => {
-  buyerModel.setPhone(data.phone);
+events.on('contacts:phone', ({ phone }: { phone: string }) => {
+  buyerModel.setPhone(phone);
+
+  checkContactsForm();
 });
+
 
 // ================== SEND ORDER ==================
 
 events.on('contacts:submit', () => {
-  const errors = buyerModel.validate();
+  const errors = buyerModel.validateContacts();
 
   if (Object.keys(errors).length > 0) {
-    contactsForm.valid = false;
-    contactsForm.errors = Object.values(errors)
-      .join(', ');
-
+    checkContactsForm();
     return;
   }
 
@@ -275,15 +318,15 @@ events.on('contacts:submit', () => {
       .getItems()
       .map(item => item.id)
   })
-  .then((result) => {
-    cartModel.clear();
-    buyerModel.clear();
+    .then((result) => {
+      cartModel.clear();
+      buyerModel.clear();
 
-    modal.content = success.render({
-      total: result.total
-    });
+      modal.content = success.render({
+        total: result.total
+      });
 
-    modal.open();
-  })
-  .catch(console.error);
+      modal.open();
+    })
+    .catch(console.error);
 });

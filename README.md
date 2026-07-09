@@ -282,8 +282,14 @@ _price: HTMLElement — цена товара.
 
 Методы:
 
+set id(value: string): void — устанавливает идентификатор товара.
 set title(value: string): void — отображает название товара.
 set price(value: number | null): void — отображает цену товара или текст «Бесценно».
+set image(value: string): void — отображает изображение товара.
+set category(value: string): void — отображает категорию товара.
+set buttonText(value: string): void — изменяет текст кнопки.
+set disabled(value: boolean): void — блокирует или разблокирует кнопку.
+render(data: Partial<ICard>): HTMLElement — отображает переданные данные и возвращает корневой элемент.
 
 # CardCatalog
 
@@ -291,7 +297,7 @@ set price(value: number | null): void — отображает цену това
 
 Конструктор:
 
-`constructor(container: HTMLElement, actions: ICardActions)`
+constructor(container: HTMLElement, actions?: ICardActions)
 
 Поля:
 
@@ -311,7 +317,7 @@ set category(value: string): void — отображает категорию т
 
 Конструктор:
 
-`constructor(container: HTMLElement, actions: ICardActions)`
+constructor(container: HTMLElement, actions?: ICardActions)
 
 Поля:
 
@@ -336,7 +342,7 @@ set disabled(state: boolean): void — блокирует или разблок�
 
 Конструктор:
 
-`constructor(container: HTMLElement, actions: ICardActions)`
+constructor(container: HTMLElement, actions?: ICardActions)
 
 Поля:
 
@@ -392,7 +398,7 @@ set counter(value: number): void — отображает количество �
 
 Конструктор:
 
-`constructor(container: HTMLElement, actions?: IHeaderActions)`
+`constructor(container: HTMLElement)`
 
 Поля:
 
@@ -410,7 +416,7 @@ clear(): void — очищает каталог.
 
 Конструктор:
 
-`container: HTMLElement, protected events: IEvents`
+`constructor(container: HTMLElement, protected events: IEvents)`
 
 Поля:
 
@@ -430,7 +436,7 @@ set content(value: HTMLElement): void — устанавливает содер�
 
 Конструктор:
 
-`constructor(container: HTMLElement)`
+`constructor(container: HTMLElement, events: IEvents, actions?: IBasketActions)`
 
 Поля:
 
@@ -442,6 +448,9 @@ _button: HTMLButtonElement — кнопка оформления заказа.
 
 set items(value: HTMLElement[]): void — отображает товары.
 set total(value: number): void — отображает общую стоимость.
+set disabled(value: boolean): void — блокирует или разблокирует кнопку оформления.
+
+Клик по кнопке оформления — вызывает actions.onOrder
 
 ## OrderForm
 
@@ -486,7 +495,7 @@ set phone(value: string): void — отображает номер телефо�
 
 Конструктор:
 
-`constructor(container: HTMLElement)`
+`constructor(container: HTMLElement, protected onClose?: () => void)`
 
 Поля:
 
@@ -524,10 +533,10 @@ order:submit — переход к форме контактов
 contacts:submit — отправка заказа
 
 Формы ввода:
-order:payment:change — изменение способа оплаты
-order:address:change — изменение адреса
-buyer:email:change — изменение email
-buyer:phone:change — изменение телефона
+order:payment — изменение способа оплаты
+order:address — изменение адреса
+contacts:email — изменение email
+contacts:phone — изменение телефона
 
 ## Поток данных
 

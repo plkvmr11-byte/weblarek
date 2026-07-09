@@ -53,9 +53,12 @@ export class CardPreview extends Card {
     this.descriptionElement.textContent = value;
   }
 
-  set category(value: CategoryKey) {
-    this.categoryElement.textContent = categoryMap[value];
-  }
+   set category(value: CategoryKey) {
+  this.categoryElement.textContent = value;
+
+  this.categoryElement.className =
+    `card__category ${categoryMap[value]}`;
+}
 
   set buttonText(value: string) {
     this.buttonElement.textContent = value;

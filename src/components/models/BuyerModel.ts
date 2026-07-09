@@ -8,160 +8,84 @@ export class BuyerModel {
   protected address = '';
   protected email = '';
   protected phone = '';
-
   protected events: EventEmitter;
-
 
   constructor(events: EventEmitter) {
     this.events = events;
   }
 
-
-  // ================== SETTERS ==================
-
   setPayment(method: TPayment): void {
-
     this.payment = method;
-
     this.events.emit('buyer:changed');
 
   }
-
 
   setAddress(address: string): void {
-
     this.address = address;
-
     this.events.emit('buyer:changed');
-
   }
-
 
   setEmail(email: string): void {
-
     this.email = email;
-
     this.events.emit('buyer:changed');
-
   }
-
 
   setPhone(phone: string): void {
-
     this.phone = phone;
-
     this.events.emit('buyer:changed');
-
   }
-
-
 
   // ================== GET DATA ==================
 
   getBuyer(): IBuyer {
-
     return {
-
       payment: this.payment,
-
       address: this.address,
-
       email: this.email,
-
       phone: this.phone,
-
     };
-
   }
-
-
 
   // ================== CLEAR ==================
 
   clear(): void {
-
     this.payment = null;
-
     this.address = '';
-
     this.email = '';
-
     this.phone = '';
-
     this.events.emit('buyer:changed');
-
   }
-
-
 
   // ================== VALIDATION ORDER ==================
-  // Проверяем первый экран заказа
 
   validateOrder(): TBuyerErrors {
-
     const errors: TBuyerErrors = {};
-
-
-    if (!this.payment) {
-
-      errors.payment = 'Не выбран способ оплаты';
-
-    }
-
-
     if (!this.address.trim()) {
-
-      errors.address = 'Укажите адрес доставки';
-
+      errors.address = 'Необходимо указать адрес';
     }
-
-
     return errors;
-
   }
-
-
 
   // ================== VALIDATION CONTACTS ==================
-  // Проверяем второй экран заказа
 
   validateContacts(): TBuyerErrors {
-
     const errors: TBuyerErrors = {};
-
-
     if (!this.email.trim()) {
-
       errors.email = 'Укажите email';
-
     }
-
-
     if (!this.phone.trim()) {
-
       errors.phone = 'Укажите телефон';
-
     }
-
 
     return errors;
-
   }
-
-
 
   // ================== FULL VALIDATION ==================
 
   validate(): TBuyerErrors {
-
     return {
-
       ...this.validateOrder(),
-
       ...this.validateContacts(),
-
     };
-
   }
-
 }

@@ -43,7 +43,7 @@ export class Card extends Component<ICard> {
         }
     }
 
-    // ===== IMAGE (чтобы CardCatalog работал) =====
+    // ===== IMAGE =====
     set image(value: string) {
         const img = this.container.querySelector('.card__image') as HTMLImageElement;
         if (img) {
@@ -62,22 +62,22 @@ export class Card extends Component<ICard> {
     }
 
     // ===== BUTTON TEXT =====
-set buttonText(value: string) {
-    const button = this.container.querySelector('.card__button') as HTMLButtonElement;
+    set buttonText(value: string) {
+        const button = this.container.querySelector('.card__button') as HTMLButtonElement;
 
-    if (button) {
-        button.textContent = value;
+        if (button) {
+            button.textContent = value;
+        }
     }
-}
 
-// ===== DISABLED =====
-set disabled(value: boolean) {
-    const button = this.container.querySelector('.card__button') as HTMLButtonElement;
+    // ===== DISABLED =====
+    set disabled(value: boolean) {
+        const button = this.container.querySelector('.card__button') as HTMLButtonElement;
 
-    if (button) {
-        button.disabled = value;
+        if (button) {
+            button.disabled = value;
+        }
     }
-}
 
     // ===== RENDER (ВАЖНО) =====
     render(data: Partial<ICard>): HTMLElement {

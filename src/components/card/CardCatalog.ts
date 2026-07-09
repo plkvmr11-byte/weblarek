@@ -1,5 +1,8 @@
 import { Card } from './Card';
 import { ensureElement } from '../../utils/utils';
+import { categoryMap } from '../../utils/constants';
+
+type CategoryKey = keyof typeof categoryMap;
 
 export interface ICardActions {
   onClick: () => void;
@@ -36,7 +39,10 @@ export class CardCatalog extends Card {
     this.imageElement.alt = this.title;
   }
 
-  set category(value: string) {
-    this.categoryElement.textContent = value;
-  }
+  set category(value: CategoryKey) {
+  this.categoryElement.textContent = value;
+
+  this.categoryElement.className =
+    `card__category ${categoryMap[value]}`;
+}
 }

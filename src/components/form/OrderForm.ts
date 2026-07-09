@@ -6,7 +6,7 @@ export type TPayment = 'card' | 'cash';
 
 export interface IOrderForm {
   address: string;
-  payment: TPayment;
+  payment: TPayment | null;
 }
 
 export class OrderForm extends Form<IOrderForm> {
