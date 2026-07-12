@@ -27,13 +27,11 @@ export class Modal extends Component<IModal> {
 
     this.closeButton.addEventListener('click', () => {
       this.close();
-      this.events.emit('modal:close');
     });
 
     this.container.addEventListener('click', (e: MouseEvent) => {
       if (e.target === this.container) {
         this.close();
-        this.events.emit('modal:close');
       }
     });
   }
@@ -41,7 +39,6 @@ export class Modal extends Component<IModal> {
   protected closeByEsc(e: KeyboardEvent): void {
     if (e.key === 'Escape') {
       this.close();
-      this.events.emit('modal:close');
     }
   }
 
@@ -54,6 +51,8 @@ export class Modal extends Component<IModal> {
     this.container.classList.remove('modal_active');
     this.contentElement.replaceChildren();
     document.removeEventListener('keydown', this.closeByEsc);
+
+    this.events.emit('modal:close');
   }
 
   set content(value: HTMLElement) {

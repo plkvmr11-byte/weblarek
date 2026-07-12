@@ -81,16 +81,30 @@ const contactsForm = new ContactsForm(
 
 const success = new Success(
   cloneTemplate(successTpl),
-  () => modal.close()
+  () => events.emit('success:close')
 );
+
+const preview = new CardPreview(
+  cloneTemplate(cardPreviewTpl),
+  {
+    onAdd: () => events.emit('preview:add')
+  }
+);
+
+events.on('success:close', () => {
+  modal.close();
+});
 
 
 webApi.getProducts()
   .then((data: { items: IProduct[] }) => {
-    console.log(data.items);
-    productsModel.setProducts(data.items);
-  })
-  .catch(console.error);
+    const products = data.items.map(item => ({
+      ...item,
+      image: `${CDN_URL}${item.image}`
+    }));
+
+    productsModel.setProducts(products);
+  });
 
 // ================== CATALOG ==================
 
@@ -103,10 +117,7 @@ events.on('catalog:changed', () => {
       }
     );
 
-    return card.render({
-      ...item,
-      image: `${CDN_URL}${item.image}`
-    });
+    return card.render(item);
   });
 
   gallery.render({
@@ -124,29 +135,14 @@ events.on<{ id: string }>('card:select', ({ id }) => {
   }
 });
 
+
 events.on('product:preview', () => {
   const product = productsModel.getPreview();
 
   if (!product) return;
 
-  const card = new CardPreview(
-    cloneTemplate(cardPreviewTpl),
-    {
-      onAdd: () => {
-        if (cartModel.has(product.id)) {
-          cartModel.remove(product.id);
-        } else {
-          cartModel.add(product);
-        }
-
-        modal.close();
-      }
-    }
-  );
-
-  modal.content = card.render({
+  modal.content = preview.render({
     ...product,
-    image: `${CDN_URL}${product.image}`,
     buttonText:
       product.price === null
         ? 'Недоступно'
@@ -159,6 +155,21 @@ events.on('product:preview', () => {
   modal.open();
 });
 
+
+events.on('preview:add', () => {
+  const product = productsModel.getPreview();
+
+  if (!product) return;
+
+  if (cartModel.has(product.id)) {
+    cartModel.remove(product.id);
+  } else {
+    cartModel.add(product);
+  }
+
+  modal.close();
+});
+
 // ================== CART ==================
 
 events.on('cart:changed', () => {
@@ -168,15 +179,19 @@ events.on('cart:changed', () => {
 // ================== BASKET ==================
 
 events.on('basket:open', () => {
+  modal.content = basket.render();
+
+  modal.open();
+});
+
+events.on('cart:changed', () => {
   const cards = cartModel.getItems().map((item, index) => {
     const card = new CardBasket(
       cloneTemplate(cardBasketTpl),
       {
-        onRemove: () => {
-          cartModel.remove(item.id);
-          events.emit('cart:changed');
-          events.emit('basket:open');
-        }
+        onRemove: () => events.emit('basket:remove', {
+          id: item.id
+        })
       }
     );
 
@@ -191,8 +206,10 @@ events.on('basket:open', () => {
     total: cartModel.getTotal(),
     disabled: cartModel.getCount() === 0
   });
+});
 
-  modal.open();
+events.on<{ id: string }>('basket:remove', ({ id }) => {
+  cartModel.remove(id);
 });
 
 // ================== ORDER ==================
@@ -211,100 +228,81 @@ events.on('basket:checkout', () => {
   modal.open();
 });
 
-// ================== ORDER VALIDATION ==================
-
-function checkOrderForm(): void {
-  const errors = buyerModel.validateOrder();
-
-  orderForm.valid =
-    !errors.payment &&
-    !errors.address;
-
-  orderForm.errors = Object.values(errors)
-    .filter(Boolean)
-    .join(', ');
-}
-
-
 // ================== ORDER DATA ==================
-
+ 
 events.on('order:payment', ({ payment }: { payment: TPayment }) => {
   buyerModel.setPayment(payment);
-
-  orderForm.payment = payment;
-
-  checkOrderForm();
 });
 
 
 events.on('order:address', ({ address }: { address: string }) => {
   buyerModel.setAddress(address);
-
-  checkOrderForm();
 });
 
+
+// ================== BUYER UPDATE ==================
+
+events.on('buyer:changed', () => {
+  const buyer = buyerModel.getBuyer();
+
+  const orderErrors = buyerModel.validateOrder();
+
+  if (buyer.payment) {
+    orderForm.payment = buyer.payment;
+  }
+
+  orderForm.address = buyer.address;
+
+  orderForm.errors = Object.values(orderErrors)
+    .filter(Boolean)
+    .join(', ');
+
+  orderForm.valid =
+    !orderErrors.address;
+
+
+  const contactsErrors = buyerModel.validateContacts();
+
+  contactsForm.email = buyer.email;
+  contactsForm.phone = buyer.phone;
+
+  contactsForm.errors = Object.values(contactsErrors)
+    .filter(Boolean)
+    .join(', ');
+
+  contactsForm.valid =
+    !contactsErrors.email &&
+    !contactsErrors.phone;
+});
 
 // ================== NEXT STEP ==================
 
 events.on('order:submit', () => {
-  const errors = buyerModel.validateOrder();
-
-  if (Object.keys(errors).length > 0) {
-    checkOrderForm();
-    return;
-  }
+  const buyer = buyerModel.getBuyer();
 
   modal.content = contactsForm.render({
-    email: buyerModel.getBuyer().email,
-    phone: buyerModel.getBuyer().phone
+    email: buyer.email,
+    phone: buyer.phone
   });
-
-  checkContactsForm();
 
   modal.open();
 });
-
-
-// ================== CONTACT VALIDATION ==================
-
-function checkContactsForm(): void {
-  const errors = buyerModel.validateContacts();
-
-  contactsForm.valid =
-    !errors.email &&
-    !errors.phone;
-
-  contactsForm.errors = Object.values(errors)
-    .filter(Boolean)
-    .join(', ');
-}
-
 
 // ================== CONTACT FORM ==================
 
 events.on('contacts:email', ({ email }: { email: string }) => {
   buyerModel.setEmail(email);
-
-  checkContactsForm();
 });
 
 
 events.on('contacts:phone', ({ phone }: { phone: string }) => {
   buyerModel.setPhone(phone);
-
-  checkContactsForm();
 });
 
 
 // ================== SEND ORDER ==================
 
 events.on('contacts:submit', () => {
-  const errors = buyerModel.validateContacts();
-
-  if (Object.keys(errors).length > 0) {
-    checkContactsForm();
-    return;
-  }
 
   const buyer = buyerModel.getBuyer();
 
