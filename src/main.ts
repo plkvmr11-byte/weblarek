@@ -174,17 +174,7 @@ events.on('preview:add', () => {
 
 events.on('cart:changed', () => {
   header.counter = cartModel.getCount();
-});
 
-// ================== BASKET ==================
-
-events.on('basket:open', () => {
-  modal.content = basket.render();
-
-  modal.open();
-});
-
-events.on('cart:changed', () => {
   const cards = cartModel.getItems().map((item, index) => {
     const card = new CardBasket(
       cloneTemplate(cardBasketTpl),
@@ -201,16 +191,24 @@ events.on('cart:changed', () => {
     });
   });
 
-  modal.content = basket.render({
+  basket.render({
     items: cards,
     total: cartModel.getTotal(),
     disabled: cartModel.getCount() === 0
   });
 });
 
+// ================== BASKET ==================
+
+events.on('basket:open', () => {
+  modal.content = basket.render();
+  modal.open();
+});
+
 events.on<{ id: string }>('basket:remove', ({ id }) => {
   cartModel.remove(id);
 });
+
 
 // ================== ORDER ==================
 
@@ -244,8 +242,7 @@ events.on('order:address', ({ address }: { address: string }) => {
 
 events.on('buyer:changed', () => {
   const buyer = buyerModel.getBuyer();
-
-  const orderErrors = buyerModel.validateOrder();
+  const errors = buyerModel.validate();
 
   if (buyer.payment) {
     orderForm.payment = buyer.payment;
@@ -253,26 +250,24 @@ events.on('buyer:changed', () => {
 
   orderForm.address = buyer.address;
 
-  orderForm.errors = Object.values(orderErrors)
+  orderForm.errors = [errors.payment, errors.address]
     .filter(Boolean)
     .join(', ');
 
   orderForm.valid =
-    !orderErrors.address;
-
-
-  const contactsErrors = buyerModel.validateContacts();
+    !errors.payment &&
+    !errors.address;
 
   contactsForm.email = buyer.email;
   contactsForm.phone = buyer.phone;
 
-  contactsForm.errors = Object.values(contactsErrors)
+  contactsForm.errors = [errors.email, errors.phone]
     .filter(Boolean)
     .join(', ');
 
   contactsForm.valid =
-    !contactsErrors.email &&
-    !contactsErrors.phone;
+    !errors.email &&
+    !errors.phone;
 });
 
 // ================== NEXT STEP ==================

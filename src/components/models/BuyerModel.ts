@@ -56,36 +56,22 @@ export class BuyerModel {
     this.events.emit('buyer:changed');
   }
 
-  // ================== VALIDATION ORDER ==================
+  // ================== VALIDATION ================== 
 
-  validateOrder(): TBuyerErrors {
-    const errors: TBuyerErrors = {};
-    if (!this.address.trim()) {
-      errors.address = 'Необходимо указать адрес';
-    }
-    return errors;
-  }
-
-  // ================== VALIDATION CONTACTS ==================
-
-  validateContacts(): TBuyerErrors {
-    const errors: TBuyerErrors = {};
+  validate(): TBuyerErrors { 
+    const errors: TBuyerErrors = {}; 
+    if (!this.payment) { 
+      errors.payment = 'Не выбран способ оплаты'; 
+    } 
+    if (!this.address.trim()) { 
+      errors.address = 'Укажите адрес доставки'; 
+    } 
     if (!this.email.trim()) {
       errors.email = 'Укажите email';
     }
-    if (!this.phone.trim()) {
-      errors.phone = 'Укажите телефон';
+    if (!this.phone.trim()) { 
+      errors.phone = 'Укажите телефон'; 
     }
-
-    return errors;
-  }
-
-  // ================== FULL VALIDATION ==================
-
-  validate(): TBuyerErrors {
-    return {
-      ...this.validateOrder(),
-      ...this.validateContacts(),
-    };
-  }
+    return errors; 
+  } 
 }
